@@ -1,0 +1,243 @@
+{
+  "name": "LoopnData",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -624,
+        -96
+      ],
+      "id": "f97f4a06-6104-4d91-a6f3-12c558ec334b",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2dad43d0-c77a-4b0b-8e8c-eaed4fce9daf",
+              "name": "=users",
+              "value": "[{\"name\" : \"Anbu\", \"age\" :  56, \"city\" : \"Chennai\"}, \n {\"name\" : \"Ezhil\", \"age\" :  26, \"city\" : \"Madurai\"}, \n {\"name\" : \"Dhayaa\", \"age\" :  36, \"city\" : \"CBE\"}]",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -416,
+        -96
+      ],
+      "id": "a775feb7-2822-4d66-91c6-34ca44b09293",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Input array\nconst data = [\n  {\n    \"users\": [\n      { \"name\": \"Anbu\", \"age\": 56, \"city\": \"Chennai\" },\n      { \"name\": \"Ezhil\", \"age\": 26, \"city\": \"Madurai\" },\n      { \"name\": \"Dhayaa\", \"age\": 36, \"city\": \"CBE\" }\n    ]\n  }\n];\n\n// Extract the users\nconst users = data[0].users;\n\n// Map each user into an n8n item\nreturn users.map(user => ({ json: user }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -208,
+        -96
+      ],
+      "id": "6984cafe-848a-41fe-a170-e7cb5f601ad6",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "batchSize": 3,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        0,
+        -96
+      ],
+      "id": "b52745e4-f0df-43a5-a1ed-784897b01333",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "4651329a-7071-49d5-a7a9-21e17f218e3b",
+              "leftValue": "={{ $json.age }}",
+              "rightValue": 40,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        416,
+        -96
+      ],
+      "id": "5e7f3492-0c6d-4d24-9488-163a45360b05",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a19421d4-9c79-4f01-9ac3-73638dfdea50",
+              "name": "Message",
+              "value": "=Old {{ $json.name }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        624,
+        -192
+      ],
+      "id": "6d11ef33-fa57-4011-b4d1-e9c7e2d08504",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e0363f31-7907-4e73-ae7b-d8f6c0f73802",
+              "name": "Message",
+              "value": "=Young {{ $json.name }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        624,
+        0
+      ],
+      "id": "ee3dbbed-b529-4eaa-b7aa-4922a7b9bddc",
+      "name": "Edit Fields2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "9c5a9d7e-b5d9-4cd7-b2c6-ae86423b6bac",
+  "meta": {
+    "instanceId": "e7673fd59928957f9172389e057baad3c82f47aabc467fa68194fd1e1aae0b04"
+  },
+  "id": "18aNuOG5UKBUm4ew",
+  "tags": []
+}

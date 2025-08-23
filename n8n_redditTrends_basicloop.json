@@ -1,0 +1,281 @@
+{
+  "name": "redditTrends_basicloop",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "77590a0e-4509-462d-91d2-d21a08e84e16",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [
+        -1072,
+        -272
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Reformat below content as professional email update:\n{{ $json.htmlContent }}",
+        "options": {
+          "systemMessage": "You are a professional Email Builder.\nFor the input you get from REdit in Json format supposed to formatted, well documentd as email to gmail"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        -272
+      ],
+      "id": "c9743de0-5a3d-429e-9824-1376a4875fcb",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "location": "allReddit",
+        "keyword": "={{ $json.Topic }}",
+        "limit": 5,
+        "additionalFields": {
+          "sort": "top"
+        }
+      },
+      "type": "n8n-nodes-base.reddit",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        -464
+      ],
+      "id": "6fd03a65-601a-4b07-8070-4c66aca61c05",
+      "name": "Search Top Posts for each Topics",
+      "credentials": {
+        "redditOAuth2Api": {
+          "id": "8H6zCk0kxWe0y8jM",
+          "name": "Reddit account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get all incoming Reddit posts from previous node\nconst items = $input.all();\n\n// Build HTML from each Reddit post\nconst html = items.map(item => {\n  const d = item.json;\n  const details = d.selftext && d.selftext.trim() !== \"\"\n    ? d.selftext\n    : `<a href=\"${d.url}\">View Content</a>`;\n\n  return `<h3>${d.title}</h3>\n          <p>${details}</p>\n          <p><a href=\"https://reddit.com${d.permalink}\">Discuss on Reddit</a></p>\n          <hr>`;\n}).join(\"\\n\");\n\n// Return one HTML string\nreturn [\n  {\n    json: {\n      htmlContent: html\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -224,
+        -272
+      ],
+      "id": "e0c72cd6-b647-447c-a558-51e2438b5a39",
+      "name": "Logic to pass the required content from previous JSON output"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        -80
+      ],
+      "id": "e90ed0ab-90e3-40f3-91ec-7c49f4686f06",
+      "name": "OpenAI to Form the Professional Email",
+      "credentials": {
+        "openAiApi": {
+          "id": "6G4QNhLvWmkB8Ysz",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "=lsanbu@gmail.com",
+        "subject": "Top Reddit AI Posts - Summarized by AI",
+        "message": "={{ $json.output }}",
+        "options": {}
+      },
+      "id": "eeea1fb9-7d0f-4eb8-81d5-944996083f3f",
+      "name": "To Email the Top Trending Content for each Subscribers as per theri subscription of Topics",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [
+        400,
+        -272
+      ],
+      "webhookId": "27f42ef3-3ac2-4bbd-b8eb-bdc6ca6d5d60",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "5bgCEouoZM2bih5C",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "To Email the Top Trending Content for each Subscribers as per theri subscription of Topics",
+        "height": 288
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        336,
+        -368
+      ],
+      "id": "d1c23cfe-ed89-45eb-9821-fc388b926c25",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -576,
+        -304
+      ],
+      "id": "8ad7a348-a354-4c8f-b929-a451dde0d2b9",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1LNW1Fr4Kd2vpxHJHyRpOx0niGUWtk-OVZUbHlti1K3A",
+          "mode": "list",
+          "cachedResultName": "RedditTrendSubscribers",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LNW1Fr4Kd2vpxHJHyRpOx0niGUWtk-OVZUbHlti1K3A/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Subscribers",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LNW1Fr4Kd2vpxHJHyRpOx0niGUWtk-OVZUbHlti1K3A/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        -832,
+        -256
+      ],
+      "id": "dda1ae60-4db1-47a5-91b0-b848449a9fd8",
+      "name": "Get Topic and Email ID",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "sJcVCOC0rdMnPx82",
+          "name": "Google Sheets account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Topic and Email ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "To Email the Top Trending Content for each Subscribers as per theri subscription of Topics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Top Posts for each Topics": {
+      "main": [
+        [
+          {
+            "node": "Logic to pass the required content from previous JSON output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Logic to pass the required content from previous JSON output": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI to Form the Professional Email": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Search Top Posts for each Topics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "To Email the Top Trending Content for each Subscribers as per theri subscription of Topics": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Topic and Email ID": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "36f28cd7-3b37-4760-a27c-a8d876d3df18",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e7673fd59928957f9172389e057baad3c82f47aabc467fa68194fd1e1aae0b04"
+  },
+  "id": "gy3HHrNhSd2n0KOP",
+  "tags": []
+}
