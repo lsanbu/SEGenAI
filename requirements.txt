@@ -1,0 +1,12 @@
+flask
+flask-cors
+openai
+langchain
+langchain-community
+langchain_openai
+python-dotenv
+PyMuPDF
+Pillow
+faiss-cpu
+flask-cors
+your_blueprint_file

@@ -1,0 +1,29 @@
+# --- Environment files (do NOT commit secrets) ---
+.env
+.env.*
+!.env.example        # keep a template for others
+
+# --- Node / Bun ---
+node_modules/
+npm-debug.log*
+pnpm-debug.log*
+bun.lockb            # (optional) usually you commit your lockfile; remove if you want it tracked
+
+# --- Python (if any) ---
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# --- Build artifacts ---
+dist/
+build/
+.out/
+.next/
+coverage/
+
+# --- IDE / OS noise ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
