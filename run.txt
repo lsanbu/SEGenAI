@@ -1,0 +1,9 @@
+pip install -r requirements.txt
+# Set env var for OpenAI
+# Windows (PowerShell):
+#   $env:OPENAI_API_KEY="sk-..."
+# macOS/Linux:
+#   export OPENAI_API_KEY="sk-..."
+
+streamlit run app.py
+TASKKILL /F /IM python.exe /T
